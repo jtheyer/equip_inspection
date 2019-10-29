@@ -53,6 +53,10 @@ class _MyHomePageState extends State<MyHomePage> {
   String engineOilStatus;
   int hydraulicOilRadio;
   String hydraulicOilStatus;
+  int hoseConditionRadio;
+  String hoseConditionStatus;
+  int cabRadio;
+  String cabStatus;
 
   TextEditingController _commentsController = TextEditingController();
   final TextEditingController _equipmentNumController = TextEditingController();
@@ -66,35 +70,40 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 //  setData();
-}
+  }
 
-saveData() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  saveData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 //  int _engineOilRadio = prefs.getInt('engineOilRadio');
-   prefs.setInt('engOil', engineOilRadio);
-   prefs.setInt('hydOil', hydraulicOilRadio);
-}
+    prefs.setInt('engOil', engineOilRadio);
+    prefs.setInt('hydOil', hydraulicOilRadio);
+    prefs.setInt('hoseCond', hoseConditionRadio);
+    prefs.setInt('cab', cabRadio);
+  }
 
-loadData() async {
+  loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       engineOilRadio = prefs.getInt('engOil') ?? 0;
       hydraulicOilRadio = prefs.getInt('hydOil') ?? 0;
+      hoseConditionRadio = prefs.getInt('hoseCond') ?? 0;
+      cabRadio = prefs.getInt('cab') ?? 0;
     });
-}
+  }
 
-clearData() async{
+  clearData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.clear();
-}
+  }
 
-setData(){
-  loadData().then((value){
-    setState(() {
-      engineOilRadio = value;
+  setData() {
+    loadData().then((value) {
+      setState(() {
+        engineOilRadio = value;
+      });
     });
-  });
-}
+  }
+
   _sendMail() async {
     setCommentsSection(_commentsController);
     final Email myEmail = Email(
@@ -103,6 +112,12 @@ setData(){
           " \n" +
           "Hydraulic Oil: " +
           hydraulicOilStatus +
+          " \n" +
+          "Hose Condition: " +
+          hoseConditionStatus +
+          " \n" +
+          "Cab & Mirrors: " +
+          cabStatus +
           " \n" +
           "\n Comments: " +
           _commentsController.text,
@@ -117,7 +132,7 @@ setData(){
 //      attachmentPath: '/path/to/attachment.zip',
     );
     await FlutterEmailSender.send(myEmail);
-   // saveData();
+    // saveData();
   }
 
   setCommentsSection(TextEditingController commentController) {
@@ -142,15 +157,15 @@ setData(){
               return AlertDialog(
                 title: Text("Set Company Name"),
                 content: TextField(
-                  controller: _coNameController,
-                  decoration:
-                      InputDecoration(hintText: "Company name goes here..."),
-                onSubmitted: (String coName) {
-                    setState((){
-                      _coNameController.text = coName;
-                    });
-                  }// (){FocusScope.of(context).requestFocus(new FocusNode());}, TODO: Close this dialog onSubmit
-                ),
+                    controller: _coNameController,
+                    decoration:
+                        InputDecoration(hintText: "Company name goes here..."),
+                    onSubmitted: (String coName) {
+                      setState(() {
+                        _coNameController.text = coName;
+                      });
+                    } // (){FocusScope.of(context).requestFocus(new FocusNode());}, TODO: Close this dialog onSubmit
+                    ),
                 actions: <Widget>[
                   new FlatButton(
                     child: new Text('Cancel'),
@@ -215,6 +230,8 @@ setData(){
     setState(() {
       engineOilRadio = 0;
       hydraulicOilRadio = 0;
+      hoseConditionRadio = 0;
+      cabRadio = 0;
     });
   }
 
@@ -239,6 +256,19 @@ setData(){
     setState(() {
       hydraulicOilRadio = val;
       hydraulicOilStatus = status;
+    });
+  }
+
+  setHoseConditionRadio(int val, String status) {
+    setState(() {
+      hoseConditionRadio = val;
+      hoseConditionStatus = status;
+    });
+  }
+  setCabRadio(int val, String status) {
+    setState(() {
+      cabRadio = val;
+      cabStatus = status;
     });
   }
 
@@ -267,15 +297,14 @@ setData(){
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: Text(_coNameController.text  + " " + widget.title),
+          title: Text(_coNameController.text + " " + widget.title),
           actions: <Widget>[
             PopupMenuButton(
               onSelected: choiceSelection,
               itemBuilder: (BuildContext context) {
                 return Constants.choices.map((String choice) {
                   return PopupMenuItem<String>(
-                      value: choice,
-                      child: Text(choice)); //PopupMenuItem
+                      value: choice, child: Text(choice)); //PopupMenuItem
                 }).toList(); //PopupMenuButton
               },
             ),
@@ -418,6 +447,73 @@ setData(){
                 Text("Hydraulic Oil"),
               ],
             ),
+            ButtonBar(
+              alignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Radio(
+                  value: 7,
+                  groupValue: hoseConditionRadio,
+                  activeColor: Colors.green,
+                  onChanged: (val) {
+                    print("Radio $val");
+                    setHoseConditionRadio(val, "Pass");
+                  },
+                ), //Radio
+                Radio(
+                  value: 8,
+                  groupValue: hoseConditionRadio,
+                  activeColor: Colors.red,
+                  onChanged: (val) {
+                    print("Radio $val");
+                    setHoseConditionRadio(val, "Fail");
+                  },
+                ), //Radio
+                Radio(
+                  value: 9,
+                  groupValue: hoseConditionRadio,
+                  activeColor: Colors.black,
+                  onChanged: (val) {
+                    print("Radio $val");
+                    setHoseConditionRadio(val, "Not Applicable");
+                  },
+                ), //Radio
+                Text("Hose Condition"),
+              ],
+            ),
+            ButtonBar(
+              alignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Radio(
+                  value: 10,
+                  groupValue: cabRadio,
+                  activeColor: Colors.green,
+                  onChanged: (val) {
+                    print("Radio $val");
+                    setCabRadio(val, "Pass");
+                  },
+                ), //Radio
+                Radio(
+                  value: 11,
+                  groupValue: cabRadio,
+                  activeColor: Colors.red,
+                  onChanged: (val) {
+                    print("Radio $val");
+                    setCabRadio(val, "Fail");
+                  },
+                ), //Radio
+                Radio(
+                  value: 12,
+                  groupValue: cabRadio,
+                  activeColor: Colors.black,
+                  onChanged: (val) {
+                    print("Radio $val");
+                    setCabRadio(val, "Not Applicable");
+                  },
+                ), //Radio
+                Text("Cab & Mirrors"),
+              ],
+            ),
+
             Container(
                 alignment: Alignment.center,
                 padding: EdgeInsets.fromLTRB(5, 35, 5, 0),
@@ -428,30 +524,36 @@ setData(){
                   maxLines: null,
                 )), //Container
           ],
-        ), //ListView
+        ),
+        //ListView
 
         floatingActionButton: FloatingActionButton(
           onPressed: _sendMail,
           tooltip: 'Send Report',
           child: Icon(Icons.send),
-        ), //floatingActionButton This trailing comma makes auto-formatting nicer for build methods.
-      persistentFooterButtons: <Widget>[
-        RaisedButton(
-          onPressed: loadData,
-          child: Text('Read',
-          style: TextStyle(color: Colors.black),),
         ),
-        RaisedButton(
-          onPressed: saveData,
-          child: Text('Save',
-          style: TextStyle(color: Colors.black),)
-        ),
-        RaisedButton(
-            onPressed: clearData,
-            child: Text('Clear',
-              style: TextStyle(color: Colors.black),)
-        ),
-      ],
+        //floatingActionButton This trailing comma makes auto-formatting nicer for build methods.
+        persistentFooterButtons: <Widget>[
+          RaisedButton(
+            onPressed: loadData,
+            child: Text(
+              'Read',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          RaisedButton(
+              onPressed: saveData,
+              child: Text(
+                'Save',
+                style: TextStyle(color: Colors.black),
+              )),
+          RaisedButton(
+              onPressed: clearData,
+              child: Text(
+                'Clear',
+                style: TextStyle(color: Colors.black),
+              )),
+        ],
       ), //Scaffold
     ); //KeyboardDismisser
   }
